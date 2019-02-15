@@ -46,15 +46,15 @@ void* thread_func(void* arg)
 	//write logic here
 	if(strcmp(ti_ptr->method, "read") == 0)
 	{
-		sem_wait(ti_ptr->mutsem_addr);
-		*(ti_ptr->rcount_addr)+=1;
-		if(*(ti_ptr->rcount_addr) == 1)
+		sem_wait(ti_ptr->mutsem_addr); //lock mutex
+		*(ti_ptr->rcount_addr)+=1; //incremend readercount
+		if(*(ti_ptr->rcount_addr) == 1) //if first reader lock rwsem
 		{
 			sem_wait(ti_ptr->rwsem_addr);
 		}
-		sem_post(ti_ptr->mutsem_addr);
+		sem_post(ti_ptr->mutsem_addr); //unlock mutex
 
-
+		//READER STUFF, N READERS CAN BE HERE
 		int openfd = open("foo.txt", O_RDONLY);
 		if(openfd < 0)
 		{
@@ -65,15 +65,15 @@ void* thread_func(void* arg)
 		pread(openfd, readbuff, 100, 0);
 		printf("Thread %d: I read %s", ti_ptr->id, readbuff);
 		close(openfd); //<----- may be problematic
+		//END READER STUFF
 
-
-		sem_wait(ti_ptr->mutsem_addr);
-		*(ti_ptr->rcount_addr)-=1;
-		if(*(ti_ptr->rcount_addr) == 0)
+		sem_wait(ti_ptr->mutsem_addr); //lock mutex
+		*(ti_ptr->rcount_addr)-=1; //decrement readercount
+		if(*(ti_ptr->rcount_addr) == 0)//if last reader, unlock rwsem
 		{
 			sem_post(ti_ptr->rwsem_addr);
 		}
-		sem_post(ti_ptr->mutsem_addr);
+		sem_post(ti_ptr->mutsem_addr);//unlock mutex
 	}
 	else if(strcmp(ti_ptr->method, "write") == 0)
 	{
