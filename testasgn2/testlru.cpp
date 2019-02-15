@@ -61,23 +61,33 @@ class tcache
 		//methods
 		void put(string key, int val)
 		{ 
-			if()
-			//if here room in cache
-			if(csize < cmax)
+			mitr = mymap.find(key);
+			if(mitr == mymap.end())
 			{
-				insertBlock(key, val);
+				//if here key not in map
+				if(csize < cmax)
+				{
+					//if here room in cache
+					++csize;
+					insertBlock(key, val);
+				}
+				else
+				{
+				//if here cache is full
+					poplru();
+					insertBlock(key, val);
+				}
+				return;
 			}
-			else
-			{
-			//cache is full
-				poplru();
-				insertBlock(key, val);
-			}
+			//if here key exists
+			//update and move to head of list
+			mylist.remove(*(mitr->second));
+			mitr->second->bnum = val;
+			mylist.push_front(*(mitr->second));
 		}
 
 		void insertBlock(string key, int val)
 		{
-			++csize;
 			//create block that holds value
 			tblock* block = new tblock(val, key);
 			//put block at head of list
@@ -128,7 +138,7 @@ class tcache
 		{
 			for(litr = mylist.begin(); litr!=mylist.end(); ++litr)
 			{
-				cout << " | " << litr->selfkey;
+				cout << " | " << litr->selfkey<<"="<<litr->bnum;
 			}
 			cout << endl;
 		}
@@ -147,9 +157,13 @@ int main(int argc, char** argv)
 	cob.put(key2, 2);
 	cob.put(key3, 3);
 	cob.showlist();
-
-	cob.put(key2, 2);
+	cob.getmapsize();
+	cob.getlistsize();
+	cob.put(key2, 4);
 	cob.showlist();
+	cob.getmapsize();
+	cob.getlistsize();
+
 
 	//cob.poplru();
 	//cob.poplru();
