@@ -20,7 +20,8 @@
 
 /*This program shows how different threads run at different speeds.
 after multiple runs the outputs will be different. With threads
-completing at different times despite order in which orders are called*/
+completing at different times despite order in which orders are called
+open is thread safe*/
 
 struct thread_info
 {
@@ -71,7 +72,6 @@ void dispatcher(sem_t* addrof_dipsem)
 	sem_post(addrof_dipsem);
 	sleep(3);
 	printf("dispatcher: end of dispatcher\n");
-
 }
 
 int main(int argc, char** argv)
